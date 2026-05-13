@@ -1,6 +1,7 @@
 from pathlib import Path
 from contextlib import asynccontextmanager
 import logging
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,12 +15,13 @@ from app.db.sqlite import migrate
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
+port = int(os.environ.get("PORT", 8080))
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     migrate()
-    logger.info("AgentForce AI started on port %s", settings.port)
+    logger.info("AgentForce AI started on port %s", port)
     yield
 
 app = FastAPI(

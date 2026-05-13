@@ -28,4 +28,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
     CMD curl -fsS "http://127.0.0.1:${PORT:-8080}/health" || exit 1
 
-CMD ["/start.sh"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port $PORT"]
