@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AgentForce AI</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main id="landingPage" class="landing-page">
+      <nav class="landing-nav">
+        <a class="brand" href="/"><span>AF</span><strong>AgentForce AI</strong></a>
+        <div class="landing-actions">
+          <a class="text-link" href="/login">Login</a>
+          <a class="primary-button" href="/app">Get Started</a>
+        </div>
+      </nav>
+
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <p class="hero-kicker">Structured AI workspace</p>
+          <h1>AgentForce AI</h1>
+          <p class="hero-subtitle">Your AI assistant for chat, study, coding, and research</p>
+          <div class="hero-cta">
+            <a class="primary-button" href="/app">Get Started</a>
+            <a class="secondary-button" href="/login">Login</a>
+          </div>
+        </div>
+
+        <section class="hero-preview" aria-label="AgentForce AI preview">
+          <div class="preview-header">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="preview-sidebar">
+            <div class="preview-chip active">General Chat</div>
+            <div class="preview-chip">Study Mode</div>
+            <div class="preview-chip">Research Mode</div>
+            <div class="preview-chip">Summarizer</div>
+          </div>
+          <div class="preview-conversation">
+            <article class="preview-bubble user">Turn these notes into a study guide.</article>
+            <article class="preview-bubble ai">I can organize the topic, explain the core ideas, and create a concise revision checklist.</article>
+          </div>
+        </section>
+      </section>
+
+      <section class="feature-grid">
+        <article class="feature-card">
+          <h2>Chat Assistant</h2>
+          <p>Fast conversation, streaming replies, Markdown support, and saved chat history.</p>
+        </article>
+        <article class="feature-card">
+          <h2>Study Mode</h2>
+          <p>Clear explanations, learning structure, and guided follow-up prompts.</p>
+        </article>
+        <article class="feature-card">
+          <h2>Research Mode</h2>
+          <p>Structured answers with findings, caveats, and grounded document context.</p>
+        </article>
+        <article class="feature-card">
+          <h2>Summarizer</h2>
+          <p>Upload material, extract the essentials, and turn it into actionable summaries.</p>
+        </article>
+      </section>
+    </main>
+
+    <main id="authPage" class="auth-page" hidden>
+      <a class="brand auth-brand" href="/"><span>AF</span><strong>AgentForce AI</strong></a>
+      <section class="auth-panel">
+        <p id="authKicker" class="hero-kicker">Welcome back</p>
+        <h1 id="authTitle">Login</h1>
+        <p id="authDescription" class="auth-description">Continue into your AI workspace.</p>
+        <form id="authForm" class="auth-form">
+          <label id="usernameWrap">Username<input id="usernameInput" autocomplete="username" /></label>
+          <label>Email<input id="emailInput" type="email" autocomplete="email" required /></label>
+          <label>Password<input id="passwordInput" type="password" autocomplete="current-password" minlength="6" required /></label>
+          <button id="authSubmit" class="primary-button full-width" type="submit">Login</button>
+        </form>
+        <p id="authSwitch" class="auth-switch"></p>
+      </section>
+    </main>
+
+    <main id="appPage" class="app-shell" hidden>
+      <aside id="sidebar" class="app-sidebar">
+        <div class="sidebar-top">
+          <a class="brand" href="/"><span>AF</span><strong>AgentForce AI</strong></a>
+          <button id="newChatBtn" class="primary-button full-width" type="button">New Chat</button>
+        </div>
+
+        <section class="sidebar-section">
+          <p class="section-label">Task Modes</p>
+          <div id="modeSelector" class="mode-selector">
+            <button data-mode="general" type="button"><span class="mode-icon" aria-hidden="true">??</span><span>General Chat</span></button>
+            <button data-mode="study" type="button"><span class="mode-icon" aria-hidden="true">??</span><span>Study Mode</span></button>
+            <button data-mode="research" type="button"><span class="mode-icon" aria-hidden="true">??</span><span>Research Mode</span></button>
+            <button data-mode="summarizer" type="button"><span class="mode-icon" aria-hidden="true">??</span><span>Summarizer</span></button>
+          </div>
+        </section>
+
+        <section class="sidebar-section history-section">
+          <div class="section-header">
+            <p class="section-label">Chat History</p>
+            <button id="refreshHistoryBtn" class="mini-button" type="button">Refresh</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+
+        <section class="sidebar-section usage-strip">
+          <div><strong id="usageMessages">0</strong><span>messages</span></div>
+          <div><strong id="usageTokens">0</strong><span>tokens</span></div>
+          <div><strong id="usageChats">0</strong><span>chats</span></div>
+        </section>
+
+        <div class="sidebar-footer">
+          <div class="profile-summary">
+            <strong id="profileName">Guest</strong>
+            <span id="profileEmail">Not signed in</span>
+          </div>
+          <div class="footer-actions">
+            <button id="settingsBtn" class="mini-button" type="button">Settings</button>
+            <button id="logoutBtn" class="mini-button" type="button">Logout</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="app-main">
+        <header class="workspace-header">
+          <button id="menuBtn" class="mini-button mobile-only" type="button">Menu</button>
+          <div>
+            <p class="section-label no-margin">Workspace</p>
+            <h1 id="workspaceTitle">General Chat</h1>
+          </div>
+          <div class="workspace-meta">
+            <span id="statusText">Ready</span>
+          </div>
+        </header>
+
+        <div id="errorBanner" class="banner" hidden></div>
+
+        <section class="mode-overview">
+          <div>
+            <p class="section-label no-margin">Current Mode</p>
+            <h2 id="modeHeading">General Chat</h2>
+            <p id="modeDescription">Ask anything, switch models, and keep your conversations organized.</p>
+          </div>
+          <div class="overview-actions">
+            <button id="demoBtn" class="secondary-button" type="button">Demo Mode</button>
+            <button id="ragToggle" class="secondary-button" type="button">RAG Off</button>
+          </div>
+        </section>
+
+        <section id="messages" class="messages-panel" aria-live="polite"></section>
+
+        <section class="utility-row">
+          <span id="uploadStatus">No document uploaded</span>
+          <div class="utility-actions">
+            <button id="uploadBtn" class="mini-button" type="button">Attach File</button>
+            <button id="exportBtn" class="mini-button" type="button">Export</button>
+          </div>
+        </section>
+
+        <form id="chatForm" class="composer-bar">
+          <input id="fileInput" type="file" accept=".pdf,.txt,.md,.csv,.json,.py,.js,.ts,.tsx" hidden />
+          <button id="micBtn" class="icon-button" type="button" title="Voice input">Mic</button>
+          <textarea id="messageInput" rows="1" placeholder="Message AgentForce AI..." autocomplete="off"></textarea>
+          <button id="sendBtn" class="primary-button send-button" type="submit" disabled>Send</button>
+        </form>
+      </section>
+    </main>
+
+    <div id="settingsBackdrop" class="modal-backdrop" hidden>
+      <section class="settings-modal" role="dialog" aria-modal="true" aria-label="Settings">
+        <header class="settings-header">
+          <div>
+            <p class="section-label no-margin">Settings</p>
+            <h2>Workspace Preferences</h2>
+          </div>
+          <button id="closeSettingsBtn" class="mini-button" type="button">Close</button>
+        </header>
+
+        <label>Model
+          <select id="settingsModel"></select>
+        </label>
+
+        <label>Temperature <span id="temperatureValue">0.7</span>
+          <input id="temperature" type="range" min="0" max="2" step="0.1" value="0.7" />
+        </label>
+
+        <label class="toggle-row"><input id="ragSettingsToggle" type="checkbox" /> Enable RAG</label>
+        <button id="clearCurrentChatBtn" class="secondary-button full-width" type="button">Clear Current Chat</button>
+      </section>
+    </div>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="/script.js"></script>
+  </body>
+</html>

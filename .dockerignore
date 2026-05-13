@@ -1,0 +1,14 @@
+.git
+.pytest_cache
+__pycache__
+*.pyc
+.env
+data
+docs
+tests
+models/ollama/cache
+models/ollama/history
+models/ollama/id_ed25519
+models/ollama/id_ed25519.pub
+models/ollama/models/blobs
+data/postgres

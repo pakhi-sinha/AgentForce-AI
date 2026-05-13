@@ -1,0 +1,25 @@
+services:
+  agentforge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agentforge-ai
+    env_file:
+      - .env.example
+    environment:
+      PORT: ${PORT:-8080}
+      OLLAMA_BASE_URL: http://127.0.0.1:11434
+      AGENTFORGE_SQLITE_PATH: /app/data/agentforge.sqlite3
+      AGENTFORGE_VOICE_WORK_DIR: /app/data/voice
+      AGENTFORGE_CHROMA_HOST: 127.0.0.1
+      AGENTFORGE_REDIS_URL: redis://127.0.0.1:6379/0
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:$${PORT:-8080}/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

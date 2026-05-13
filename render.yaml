@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: agentforge-ai
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: OLLAMA_BASE_URL
+        value: ""
+      - key: AGENTFORGE_START_OLLAMA
+        value: false
+      - key: AGENTFORGE_DEFAULT_MODEL
+        value: llama3
+      - key: AGENTFORGE_ENABLE_ONLINE_MODE
+        value: true
+      - key: OPENAI_API_KEY
+        sync: false

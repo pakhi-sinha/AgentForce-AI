@@ -1,0 +1,26 @@
+models:
+  planner:
+    provider: ollama
+    tag: llama3
+    quantization: q4_K_M
+    purpose: planning and decomposition
+  executor:
+    provider: ollama
+    tag: mistral
+    quantization: q4_K_M
+    purpose: tool-aware task execution
+  evaluator:
+    provider: ollama
+    tag: gemma
+    quantization: q4_K_M
+    purpose: validation and critique
+  coding:
+    provider: ollama
+    tag: deepseek-coder
+    quantization: q4_K_M
+    purpose: local code reasoning
+  edge:
+    provider: ollama
+    tag: phi3
+    quantization: q4_K_M
+    purpose: low-memory execution
