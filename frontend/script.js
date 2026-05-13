@@ -99,10 +99,17 @@ const state = {
 };
 
 const settings = {
-  model: "llama3",
+  model: "deepseek/deepseek-chat",
   temperature: 0.7,
   rag_enabled: false,
 };
+
+const DEFAULT_OPENROUTER_MODELS = [
+  "deepseek/deepseek-chat",
+  "google/gemini-pro",
+  "mistralai/mistral-7b-instruct",
+  "openrouter/auto",
+];
 
 function loadPersistedState() {
   try {
@@ -298,7 +305,7 @@ async function loadSettings() {
 async function loadModels() {
   try {
     const data = await api("/models", { auth: false });
-    const models = (data.models || []).map((entry) => entry.name || entry.model).filter(Boolean);
+    const models = (data.models || []).map((entry) => entry.id || entry.name || entry.model).filter(Boolean);
     state.availableModels = [...new Set(models)];
   } catch {
     state.availableModels = [];
@@ -307,7 +314,7 @@ async function loadModels() {
 }
 
 function renderModelOptions() {
-  const models = state.availableModels.length ? state.availableModels : [settings.model || "llama3"];
+  const models = state.availableModels.length ? state.availableModels : DEFAULT_OPENROUTER_MODELS;
   els.settingsModel.innerHTML = models
     .map((model) => `<option value="${escapeHtml(model)}">${escapeHtml(model)}</option>`)
     .join("");

@@ -9,7 +9,10 @@ class Settings(BaseSettings):
 
     offline_mode: bool = True
     enable_online_mode: bool = False
-    default_model: str = "llama3"
+    default_model: str = Field(
+        default="deepseek/deepseek-chat",
+        validation_alias=AliasChoices("DEFAULT_MODEL", "AGENTFORGE_DEFAULT_MODEL"),
+    )
     fast_model: str = "phi3"
     coding_model: str = "deepseek-coder"
     ollama_port: int | None = Field(
@@ -25,8 +28,13 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("OPENAI_API_KEY", "AGENTFORGE_OPENAI_API_KEY"),
     )
-    openai_base_url: str = "https://api.openai.com/v1"
+    openai_base_url: str = Field(
+        default="https://openrouter.ai/api/v1",
+        validation_alias=AliasChoices("OPENAI_BASE_URL", "AGENTFORGE_OPENAI_BASE_URL"),
+    )
     openai_model: str = "gpt-4o-mini"
+    openrouter_http_referer: str = "https://your-app.onrender.com"
+    openrouter_x_title: str = "AgentForce AI"
     sqlite_path: str = "data/agentforge.sqlite3"
     rag_chunk_size: int = 1200
     rag_chunk_overlap: int = 160
