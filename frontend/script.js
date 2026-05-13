@@ -138,13 +138,20 @@ function authHeaders(json = true) {
   return headers;
 }
 
+function requestHeaders(options = {}) {
+  const headers = {};
+  if (options.json !== false) headers["Content-Type"] = "application/json";
+  if (options.auth !== false && state.token) headers.Authorization = `Bearer ${state.token}`;
+  return {
+    ...headers,
+    ...(options.headers || {}),
+  };
+}
+
 async function api(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: {
-      ...(options.headers || {}),
-      ...(options.auth === false ? {} : authHeaders(options.json !== false)),
-    },
+    headers: requestHeaders(options),
   });
   const contentType = response.headers.get("content-type") || "";
   const payload = contentType.includes("application/json") ? await response.json() : await response.text();
