@@ -150,7 +150,7 @@ async function api(path, options = {}) {
   const payload = contentType.includes("application/json") ? await response.json() : await response.text();
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) logout(true);
-    throw new Error(typeof payload === "object" ? payload.detail || JSON.stringify(payload) : payload);
+    throw new Error(normalizeErrorPayload(payload));
   }
   return payload;
 }
@@ -158,6 +158,7 @@ async function api(path, options = {}) {
 async function route() {
   loadPersistedState();
   state.route = window.location.pathname.replace(/\/$/, "") || "/";
+  document.body.classList.toggle("app-route", state.route === "/app");
   if (state.route === "/chat") {
     go("/app", true);
     return;
@@ -805,12 +806,29 @@ function escapeHtml(value) {
 }
 
 
+function normalizeErrorPayload(payload) {
+  if (payload == null) return "Request failed.";
+  if (typeof payload === "string") return payload;
+  const detail = payload.detail ?? payload.message ?? payload.error ?? payload;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const first = detail[0];
+    if (typeof first === "string") return first;
+    if (first && typeof first === "object") return first.msg || JSON.stringify(first);
+    return JSON.stringify(detail);
+  }
+  if (detail && typeof detail === "object") return detail.msg || JSON.stringify(detail);
+  return String(detail);
+}
+
 function readableError(message) {
+  if (typeof message === "object" && message !== null) return normalizeErrorPayload(message);
   try {
     const parsed = JSON.parse(message);
-    return parsed.detail || message;
+    return normalizeErrorPayload(parsed);
   } catch {
-    return message;
+    if (message === "[object Object]") return "Request failed. Please check your input and try again.";
+    return String(message || "Request failed.");
   }
 }
 

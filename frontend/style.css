@@ -23,7 +23,8 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; background: radial-gradient(circle at top, rgba(34, 197, 94, 0.08), transparent 24%), var(--bg); color: var(--text); font-family: "Segoe UI Variable Display", "Aptos", "Trebuchet MS", sans-serif; }
-body { overflow: hidden; }
+body { overflow-x: hidden; overflow-y: auto; }
+body.app-route { overflow: hidden; }
 a { color: inherit; text-decoration: none; }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
