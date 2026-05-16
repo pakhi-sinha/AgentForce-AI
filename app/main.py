@@ -70,4 +70,9 @@ async def login_app() -> FileResponse:
 async def signup_app() -> FileResponse:
     return FileResponse(FRONTEND_DIR / "index.html")
 
+
+@app.get("/forgot-password")
+async def forgot_password_app() -> FileResponse:
+    return FileResponse(FRONTEND_DIR / "index.html")
+
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend-root")

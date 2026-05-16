@@ -171,7 +171,7 @@ async function route() {
     return;
   }
   els.landingPage.hidden = state.route !== "/";
-  els.authPage.hidden = !["/login", "/signup"].includes(state.route);
+  els.authPage.hidden = !["/login", "/signup", "/forgot-password"].includes(state.route);
   els.appPage.hidden = state.route !== "/app";
 
   if (!els.authPage.hidden) renderAuthPage();
@@ -192,6 +192,18 @@ function go(path, replace = false) {
 
 function renderAuthPage() {
   const signup = state.route === "/signup";
+  const forgot = state.route === "/forgot-password";
+  if (forgot) {
+    els.authTitle.textContent = "Reset Password";
+    els.authKicker.textContent = "Account recovery";
+    els.authDescription.textContent = "Enter your account email and set a new password.";
+    els.authSubmit.textContent = "Update Password";
+    els.usernameWrap.hidden = true;
+    els.passwordInput.autocomplete = "new-password";
+    els.passwordInput.placeholder = "New password";
+    els.authSwitch.innerHTML = `Remembered your password? <a href="/login">Login</a>`;
+    return;
+  }
   els.authTitle.textContent = signup ? "Create Your Account" : "Welcome Back";
   els.authKicker.textContent = signup ? "Start your workspace" : "Continue where you left off";
   els.authDescription.textContent = signup
@@ -200,14 +212,29 @@ function renderAuthPage() {
   els.authSubmit.textContent = signup ? "Create Account" : "Login";
   els.usernameWrap.hidden = !signup;
   els.passwordInput.autocomplete = signup ? "new-password" : "current-password";
+  els.passwordInput.placeholder = "Password";
   els.authSwitch.innerHTML = signup
     ? `Already have an account? <a href="/login">Login</a>`
-    : `Need an account? <a href="/signup">Create one</a>`;
+    : `Need an account? <a href="/signup">Create one</a> · <a href="/forgot-password">Forgot password?</a>`;
 }
 
 async function submitAuth(event) {
   event.preventDefault();
   const signup = state.route === "/signup";
+  const forgot = state.route === "/forgot-password";
+  if (forgot) {
+    await api("/auth/forgot-password", {
+      method: "POST",
+      auth: false,
+      body: JSON.stringify({
+        email: els.emailInput.value.trim(),
+        new_password: els.passwordInput.value,
+      }),
+    });
+    toast("Password updated. Please login.");
+    go("/login");
+    return;
+  }
   const body = signup
     ? {
         username: els.usernameInput.value.trim(),

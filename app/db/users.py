@@ -33,3 +33,12 @@ def get_user_by_id(user_id: str) -> dict | None:
     with connect() as conn:
         row = conn.execute("SELECT id, username, email, created_at FROM users WHERE id = ?", (user_id,)).fetchone()
     return dict(row) if row else None
+
+
+def update_password_by_email(email: str, password_hash: str) -> bool:
+    with connect() as conn:
+        result = conn.execute(
+            "UPDATE users SET password_hash = ? WHERE email = ?",
+            (password_hash, email),
+        )
+    return result.rowcount > 0
