@@ -111,6 +111,15 @@ const DEFAULT_OPENROUTER_MODELS = [
   "openrouter/auto",
 ];
 
+// FIX: Page titles per route
+const ROUTE_TITLES = {
+  "/": "AgentForce AI",
+  "/login": "Login — AgentForce AI",
+  "/signup": "Sign Up — AgentForce AI",
+  "/forgot-password": "Reset Password — AgentForce AI",
+  "/app": "Workspace — AgentForce AI",
+};
+
 function loadPersistedState() {
   try {
     const saved = JSON.parse(localStorage.getItem(APP_STATE_KEY) || "{}");
@@ -165,6 +174,10 @@ async function api(path, options = {}) {
 async function route() {
   loadPersistedState();
   state.route = window.location.pathname.replace(/\/$/, "") || "/";
+
+  // FIX: Update page title based on current route
+  document.title = ROUTE_TITLES[state.route] || "AgentForce AI";
+
   document.body.classList.toggle("app-route", state.route === "/app");
   if (state.route === "/chat") {
     go("/app", true);
@@ -213,52 +226,67 @@ function renderAuthPage() {
   els.usernameWrap.hidden = !signup;
   els.passwordInput.autocomplete = signup ? "new-password" : "current-password";
   els.passwordInput.placeholder = "Password";
+  // FIX: Forgot password link is now clearly visible on login page
   els.authSwitch.innerHTML = signup
     ? `Already have an account? <a href="/login">Login</a>`
-    : `Need an account? <a href="/signup">Create one</a> · <a href="/forgot-password">Forgot password?</a>`;
+    : `Need an account? <a href="/signup">Create one</a><br><a href="/forgot-password">Forgot your password?</a>`;
 }
 
 async function submitAuth(event) {
   event.preventDefault();
   const signup = state.route === "/signup";
   const forgot = state.route === "/forgot-password";
-  if (forgot) {
-    await api("/auth/forgot-password", {
+
+  // FIX: Disable button and show loading state during submission
+  els.authSubmit.disabled = true;
+  const originalText = els.authSubmit.textContent;
+  els.authSubmit.textContent = "Please wait...";
+
+  try {
+    if (forgot) {
+      await api("/auth/forgot-password", {
+        method: "POST",
+        auth: false,
+        body: JSON.stringify({
+          email: els.emailInput.value.trim(),
+          new_password: els.passwordInput.value,
+        }),
+      });
+      toast("Password updated. Please login.");
+      go("/login");
+      return;
+    }
+    const body = signup
+      ? {
+          username: els.usernameInput.value.trim(),
+          email: els.emailInput.value.trim(),
+          password: els.passwordInput.value,
+        }
+      : {
+          email: els.emailInput.value.trim(),
+          password: els.passwordInput.value,
+        };
+    if (signup && !body.username) {
+      toast("Username is required.", true);
+      return;
+    }
+    const data = await api(signup ? "/auth/signup" : "/auth/login", {
       method: "POST",
       auth: false,
-      body: JSON.stringify({
-        email: els.emailInput.value.trim(),
-        new_password: els.passwordInput.value,
-      }),
+      body: JSON.stringify(body),
     });
-    toast("Password updated. Please login.");
-    go("/login");
-    return;
+    state.token = data.access_token;
+    localStorage.setItem(TOKEN_KEY, state.token);
+    state.currentUser = data.user;
+    toast(signup ? "Account created." : "Logged in.");
+    go("/app");
+  } catch (error) {
+    // FIX: Properly display auth errors instead of [object Object]
+    toast(readableError(error.message), true);
+  } finally {
+    els.authSubmit.disabled = false;
+    els.authSubmit.textContent = originalText;
   }
-  const body = signup
-    ? {
-        username: els.usernameInput.value.trim(),
-        email: els.emailInput.value.trim(),
-        password: els.passwordInput.value,
-      }
-    : {
-        email: els.emailInput.value.trim(),
-        password: els.passwordInput.value,
-      };
-  if (signup && !body.username) {
-    toast("Username is required.", true);
-    return;
-  }
-  const data = await api(signup ? "/auth/signup" : "/auth/login", {
-    method: "POST",
-    auth: false,
-    body: JSON.stringify(body),
-  });
-  state.token = data.access_token;
-  localStorage.setItem(TOKEN_KEY, state.token);
-  state.currentUser = data.user;
-  toast(signup ? "Account created." : "Logged in.");
-  go("/app");
 }
 
 function logout(silent = false) {
@@ -730,17 +758,40 @@ async function startVoiceCapture() {
   }, 7000);
 }
 
+// FIX: Markdown now renders correctly — escapeHtml runs only on non-code text,
+// after Markdown patterns are matched, so **bold** and `code` work properly.
 function renderMarkdown(text) {
-  return escapeHtml(text)
-    .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, language, code) => {
-      return `<pre><div class="code-head"><span>${language || "code"}</span><button type="button" class="copy-code">Copy</button></div><code>${code}</code></pre>`;
-    })
+  // Step 1: Pull out fenced code blocks and replace with safe placeholders
+  const codeBlocks = [];
+  let processed = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
+    const placeholder = `\x00CODE${codeBlocks.length}\x00`;
+    codeBlocks.push(
+      `<pre><div class="code-head"><span>${escapeHtml(lang || "code")}</span><button type="button" class="copy-code">Copy</button></div><code>${escapeHtml(code)}</code></pre>`
+    );
+    return placeholder;
+  });
+
+  // Step 2: Escape HTML in the remaining text (safe to do now, no Markdown left to match in code blocks)
+  processed = processed
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+  // Step 3: Apply Markdown patterns to the escaped text
+  processed = processed
     .replace(/^### (.*)$/gm, "<h3>$1</h3>")
-    .replace(/^## (.*)$/gm, "<h2>$1</h2>")
-    .replace(/^# (.*)$/gm, "<h1>$1</h1>")
+    .replace(/^## (.*)$/gm,  "<h2>$1</h2>")
+    .replace(/^# (.*)$/gm,   "<h1>$1</h1>")
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/`([^`]+)`/g,    "<code>$1</code>")
     .replace(/\n/g, "<br />");
+
+  // Step 4: Restore code blocks
+  processed = processed.replace(/\x00CODE(\d+)\x00/g, (_, i) => codeBlocks[Number(i)]);
+
+  return processed;
 }
 
 function renderSources(sources = []) {
@@ -838,7 +889,6 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
 
 function normalizeErrorPayload(payload) {
   if (payload == null) return "Request failed.";
