@@ -32,13 +32,16 @@ async def login(payload: LoginRequest):
 
 @router.post("/forgot-password")
 async def forgot_password(payload: ForgotPasswordRequest):
+    # FIX: Always return success regardless of whether the email exists.
+    # Returning a 404 when the email isn't found lets attackers enumerate
+    # which emails are registered in your database — a security risk.
     user = get_user_by_email(payload.email)
-    if not user:
-        raise HTTPException(status_code=404, detail="No account found for this email.")
-    updated = update_password_by_email(payload.email, hash_password(payload.new_password))
-    if not updated:
-        raise HTTPException(status_code=500, detail="Could not update password. Please try again.")
-    return JSONResponse({"status": "ok", "message": "Password updated successfully. Please login."})
+    if user:
+        update_password_by_email(payload.email, hash_password(payload.new_password))
+    return JSONResponse({
+        "status": "ok",
+        "message": "If that email is registered, your password has been updated. Please login."
+    })
 
 
 @router.get("/me", response_model=UserResponse)
